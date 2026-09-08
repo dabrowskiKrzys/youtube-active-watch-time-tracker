@@ -21,6 +21,56 @@ h1 {
   margin: 2px 0 8px;
 }
 
+.history {
+  margin: 12px 0 4px;
+}
+
+.history-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.history-row.is-today {
+  font-weight: 600;
+}
+
+.history-day {
+  color: #333;
+}
+
+.history-value {
+  color: #333;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-row.is-empty .history-value {
+  color: #aaa;
+}
+
+.history-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.history-total-value {
+  font-variant-numeric: tabular-nums;
+}
+
 #version {
   font-size: 11px;
   color: #666;
