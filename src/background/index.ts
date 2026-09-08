@@ -4,20 +4,7 @@ import {
   localDateKey,
   type WatchTimeStore,
 } from "../lib/storage";
-
-interface IntervalMessage {
-  type: "INTERVAL";
-  seconds: number;
-}
-
-function isIntervalMessage(message: unknown): message is IntervalMessage {
-  return (
-    typeof message === "object" &&
-    message !== null &&
-    (message as { type?: unknown }).type === "INTERVAL" &&
-    typeof (message as { seconds?: unknown }).seconds === "number"
-  );
-}
+import { isIntervalMessage, isResetMessage } from "../lib/messages";
 
 // Serialize all read-modify-write operations through a single promise chain so
 // overlapping INTERVAL messages never clobber each other's writes. MV3 workers
@@ -44,9 +31,29 @@ function recordSeconds(seconds: number): Promise<void> {
   return writeChain;
 }
 
+// Delete all stored watch-time data. Runs on the same writeChain as interval
+// writes so a reset can never interleave with an in-flight read-modify-write.
+function resetStore(): Promise<void> {
+  writeChain = writeChain
+    .then(async () => {
+      await chrome.storage.local.remove(STORAGE_KEY);
+    })
+    .catch((error) => {
+      console.warn("[YT Tracker BG] failed to reset store", error);
+    });
+  return writeChain;
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (isResetMessage(message)) {
+    // Respond only after the clear settles so the popup can await the round-trip
+    // and re-render the empty state. Returning true keeps the channel open.
+    void resetStore().then(() => sendResponse({ ok: true }));
+    return true;
+  }
   if (isIntervalMessage(message) && message.seconds > 0) {
     void recordSeconds(message.seconds);
   }
   sendResponse({ ok: true });
+  return undefined;
 });

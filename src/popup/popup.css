@@ -25,3 +25,54 @@ h1 {
   font-size: 11px;
   color: #666;
 }
+
+.danger-zone {
+  margin: 12px 0 4px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+button {
+  font: inherit;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f6f6f6;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #eee;
+}
+
+button.danger {
+  border-color: #d33;
+  color: #d33;
+  background: #fff;
+}
+
+button.danger:hover {
+  background: #fdecec;
+}
+
+.confirm-row {
+  margin-top: 8px;
+}
+
+.confirm-text {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-status {
+  font-size: 12px;
+  color: #2a7;
+  margin: 8px 0 0;
+  min-height: 1em;
+}

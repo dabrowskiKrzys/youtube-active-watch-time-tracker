@@ -31,3 +31,52 @@ async function renderTodayTotal(): Promise<void> {
 }
 
 void renderTodayTotal();
+
+function setupDeleteControls(): void {
+  const deleteBtn = document.getElementById("delete-btn");
+  const confirmRow = document.getElementById("confirm-row");
+  const confirmBtn = document.getElementById("confirm-delete-btn");
+  const cancelBtn = document.getElementById("cancel-delete-btn");
+  const statusEl = document.getElementById("delete-status");
+
+  if (!deleteBtn || !confirmRow || !confirmBtn || !cancelBtn) {
+    return;
+  }
+
+  const showConfirm = (visible: boolean): void => {
+    confirmRow.toggleAttribute("hidden", !visible);
+    deleteBtn.toggleAttribute("hidden", visible);
+  };
+
+  const setStatus = (text: string): void => {
+    if (statusEl) {
+      statusEl.textContent = text;
+    }
+  };
+
+  deleteBtn.addEventListener("click", () => {
+    setStatus("");
+    showConfirm(true);
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    showConfirm(false);
+  });
+
+  confirmBtn.addEventListener("click", () => {
+    void (async () => {
+      try {
+        await chrome.runtime.sendMessage({ type: "RESET" });
+        await renderTodayTotal();
+        setStatus("All data deleted.");
+      } catch (error) {
+        console.warn("[YT Tracker] failed to delete data", error);
+        setStatus("Delete failed — try again.");
+      } finally {
+        showConfirm(false);
+      }
+    })();
+  });
+}
+
+setupDeleteControls();
