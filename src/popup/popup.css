@@ -9,6 +9,18 @@ h1 {
   margin: 0 0 8px;
 }
 
+.label {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+#today-total {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 2px 0 8px;
+}
+
 #version {
   font-size: 11px;
   color: #666;
