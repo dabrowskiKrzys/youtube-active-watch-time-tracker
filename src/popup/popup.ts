@@ -87,6 +87,14 @@ async function refresh(): Promise<void> {
 
 void refresh();
 
+// Re-render live whenever watch-time storage changes (background records a new
+// interval, or a delete clears it) so an open popup never shows a stale total.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && STORAGE_KEY in changes) {
+    void refresh();
+  }
+});
+
 function setupDeleteControls(): void {
   const deleteBtn = document.getElementById("delete-btn");
   const confirmRow = document.getElementById("confirm-row");
