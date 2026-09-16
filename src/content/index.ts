@@ -1,5 +1,5 @@
 import { POLL_INTERVAL_MS } from "../lib/constants";
-import { isAdvancing } from "../lib/playback";
+import { creditedSeconds } from "../lib/playback";
 import { isWatchPath } from "../lib/navigation";
 
 const SEND_WARN_THROTTLE_MS = 10_000;
@@ -64,8 +64,12 @@ function startTracking(): void {
 
       // Pass the measured wall-clock elapsed time (not the nominal poll
       // interval) so timer jitter beyond 10% does not drop watched seconds.
-      if (isAdvancing(prevTime, currTime, elapsedMs)) {
-        sendInterval(currTime - prevTime);
+      // creditedSeconds returns the real seconds watched (0 when the tick is
+      // paused/stalled/backward or a seek-forward jump), and credits
+      // faster-than-1× playback at real wall-clock rate.
+      const seconds = creditedSeconds(prevTime, currTime, elapsedMs);
+      if (seconds > 0) {
+        sendInterval(seconds);
       }
 
       prevTime = currTime;
