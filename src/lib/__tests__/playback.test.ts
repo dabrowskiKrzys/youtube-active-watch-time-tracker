@@ -53,3 +53,42 @@ describe("creditedSeconds", () => {
     expect(creditedSeconds(10.0, 11.0, 0)).toBe(0);
   });
 });
+
+describe("L1-03 clock stepped backwards", () => {
+  // A negative elapsed window is nonsense; crediting from it would let a system
+  // clock adjustment inflate the day total.
+  it("credits 0 for a negative elapsedMs", () => {
+    expect(creditedSeconds(10.0, 11.0, -1000)).toBe(0);
+  });
+});
+
+describe("L1-04 non-finite readings", () => {
+  // `video.currentTime` is a number, but a detached or unloaded media element
+  // can report NaN. Without a finite check the arithmetic guards all evaluate
+  // false and Math.min returns NaN, which would then have to be caught further
+  // downstream. Returning 0 keeps the contract "seconds is always a finite,
+  // non-negative number" true at the source.
+  it.each([
+    ["NaN prev", Number.NaN, 11, 1000],
+    ["NaN curr", 10, Number.NaN, 1000],
+    ["NaN elapsed", 10, 11, Number.NaN],
+    ["Infinite curr", 10, Number.POSITIVE_INFINITY, 1000],
+    ["Infinite prev", Number.NEGATIVE_INFINITY, 11, 1000],
+    ["Infinite elapsed", 10, 11, Number.POSITIVE_INFINITY],
+  ])("credits 0 for %s", (_label, prev, curr, elapsedMs) => {
+    expect(creditedSeconds(prev, curr, elapsedMs)).toBe(0);
+  });
+
+  it("always returns a finite, non-negative number", () => {
+    const inputs = [Number.NaN, Number.POSITIVE_INFINITY, -1, 0, 10];
+    for (const prev of inputs) {
+      for (const curr of inputs) {
+        for (const elapsed of [-1000, 0, 1000, Number.NaN]) {
+          const result = creditedSeconds(prev, curr, elapsed);
+          expect(Number.isFinite(result)).toBe(true);
+          expect(result).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
+});

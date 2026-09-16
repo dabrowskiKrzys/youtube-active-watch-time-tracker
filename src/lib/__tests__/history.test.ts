@@ -198,3 +198,43 @@ describe("barPercent", () => {
     expect(barPercent(300, Number.NaN)).toBe(0);
   });
 });
+
+describe("L1-05 daylight-saving transitions", () => {
+  // Day arithmetic goes through `new Date(y, m, d - i)`, so the platform
+  // handles DST. That reasoning currently lives only in a code comment; a
+  // regression would silently shift a whole day's label. These dates bracket
+  // the EU and US transitions in both directions.
+  it.each([
+    ["EU spring forward", new Date(2026, 2, 29, 12, 0, 0)],
+    ["EU fall back", new Date(2026, 9, 25, 12, 0, 0)],
+    ["US spring forward", new Date(2026, 2, 8, 12, 0, 0)],
+    ["US fall back", new Date(2026, 10, 1, 12, 0, 0)],
+    ["just after midnight on a transition day", new Date(2026, 2, 29, 0, 30, 0)],
+    ["just before midnight on a transition day", new Date(2026, 9, 25, 23, 30, 0)],
+  ])("yields 7 distinct consecutive keys across %s", (_label, reference) => {
+    const keys = lastNDateKeys(reference);
+    expect(keys).toHaveLength(7);
+    expect(new Set(keys).size).toBe(7);
+    // Oldest -> newest, ending on the reference day.
+    expect(keys[6]).toBe(localDateKey(reference));
+    expect([...keys].sort()).toEqual(keys);
+  });
+});
+
+describe("L1-06 degenerate window sizes", () => {
+  it("returns an empty window for n = 0", () => {
+    expect(lastNDateKeys(new Date(2026, 8, 16), 0)).toEqual([]);
+    expect(getLastNDays({}, new Date(2026, 8, 16), 0)).toEqual([]);
+  });
+
+  it("sums and scales an empty window without throwing", () => {
+    const days = getLastNDays({}, new Date(2026, 8, 16), 0);
+    expect(sumSeconds(days)).toBe(0);
+    expect(maxSeconds(days)).toBe(0);
+    expect(barPercent(0, maxSeconds(days))).toBe(0);
+  });
+
+  it("returns a negative window as empty rather than looping", () => {
+    expect(lastNDateKeys(new Date(2026, 8, 16), -3)).toEqual([]);
+  });
+});

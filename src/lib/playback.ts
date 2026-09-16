@@ -23,6 +23,18 @@ export function creditedSeconds(
   curr: number,
   elapsedMs: number
 ): number {
+  // Every arithmetic guard below is a comparison, and comparisons against NaN
+  // are all false — so without an explicit finite check a NaN reading would
+  // fall through each one and be returned as a NaN credit. Rejecting up front
+  // keeps this function's contract ("a finite, non-negative number of seconds")
+  // true at the source rather than relying on callers to re-check.
+  if (
+    !Number.isFinite(prev) ||
+    !Number.isFinite(curr) ||
+    !Number.isFinite(elapsedMs)
+  ) {
+    return 0;
+  }
   const elapsedSeconds = elapsedMs / 1000;
   if (elapsedSeconds <= 0) {
     return 0;

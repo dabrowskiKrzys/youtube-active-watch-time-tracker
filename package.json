@@ -1,6 +1,6 @@
 {
   "name": "youtube-active-watch-time-tracker",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.33",
     "@types/chrome": "^0.1.42",
+    "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
     "vite": "^5.4.21",
     "vitest": "^4.1.7"

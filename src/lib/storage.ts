@@ -22,14 +22,22 @@ export function localDateKey(date: Date): string {
 
 /**
  * Returns a new store with `seconds` added to `dateKey`. Does not mutate the
- * input. Non-positive `seconds` are ignored (returns an unchanged copy).
+ * input. Non-positive and non-finite `seconds` are ignored (returns an
+ * unchanged copy).
+ *
+ * The finite check is deliberate defence in depth. `NaN <= 0` is `false`, so
+ * without it a NaN would slip past the guard and poison the day total
+ * permanently — every later `current + seconds` stays NaN, and the popup shows
+ * `0m` forever with no recovery short of delete-all. `isIntervalMessage` is the
+ * primary gate, but a single upstream guard should not be the only thing
+ * standing between a malformed message and unrecoverable user data.
  */
 export function addSeconds(
   store: WatchTimeStore,
   dateKey: string,
   seconds: number
 ): WatchTimeStore {
-  if (seconds <= 0) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
     return { ...store };
   }
   const current = store[dateKey] ?? 0;
@@ -46,10 +54,15 @@ export function getSecondsForDate(
 
 /**
  * Formats whole seconds as `Xh Ym` when >= 1 hour, `Ym` otherwise.
- * Returns `0m` for 0. Rounds down to whole minutes.
+ * Returns `0m` for 0, negative, and non-finite input. Rounds down to whole
+ * minutes.
+ *
+ * The finite check matters for `Infinity` specifically: `Infinity > 0` is true,
+ * so without it this would render `Infinityh NaNm` into the popup.
  */
 export function formatDuration(seconds: number): string {
-  const safeSeconds = seconds > 0 ? Math.floor(seconds) : 0;
+  const safeSeconds =
+    Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
   const totalMinutes = Math.floor(safeSeconds / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
