@@ -76,3 +76,33 @@ export function formatDayLabel(dateKey: string, todayKey: string): string {
   const date = new Date(year, month - 1, day);
   return date.toLocaleDateString(undefined, { weekday: "short" });
 }
+
+/**
+ * Returns the largest `seconds` value in a list of `DayTotal`s, or 0 for an
+ * empty list. Used as the 100% reference when scaling history bars.
+ */
+export function maxSeconds(days: DayTotal[]): number {
+  return days.reduce((max, day) => (day.seconds > max ? day.seconds : max), 0);
+}
+
+/**
+ * Returns the width percentage (0–100) for a history bar, scaling `seconds`
+ * against the busiest day in the window.
+ *
+ * Scaling is relative rather than against a fixed daily target: the product has
+ * no notion of an "expected" daily watch time, so the honest visual answers
+ * "which day was heaviest?" without inventing a goal. Returns 0 for empty days,
+ * an all-empty window (no divide-by-zero), and non-finite input; values above
+ * the max clamp to 100.
+ */
+export function barPercent(seconds: number, maxSeconds: number): number {
+  if (
+    !Number.isFinite(seconds) ||
+    !Number.isFinite(maxSeconds) ||
+    seconds <= 0 ||
+    maxSeconds <= 0
+  ) {
+    return 0;
+  }
+  return Math.min(100, (seconds / maxSeconds) * 100);
+}

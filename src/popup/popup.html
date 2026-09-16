@@ -7,36 +7,47 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>YouTube Watch Time Tracker</h1>
-    <p class="label">Today</p>
-    <p id="today-total">0m</p>
+    <main class="card">
+      <header class="masthead">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <h1 class="brand-name">Watch Time</h1>
+      </header>
 
-    <section class="history" aria-labelledby="history-heading">
-      <p id="history-heading" class="label">Last 7 days</p>
-      <ul id="history-list" class="history-list"></ul>
-      <p class="history-total-row">
-        <span class="history-total-label">7-day total</span>
-        <span id="history-total" class="history-total-value">0m</span>
-      </p>
-    </section>
+      <section class="hero" aria-labelledby="hero-label">
+        <p id="hero-label" class="eyebrow">Today</p>
+        <p id="today-total" class="hero-value">0m</p>
+      </section>
 
-    <div class="danger-zone">
-      <button id="delete-btn" type="button" class="danger">
-        Delete all data
-      </button>
-      <div id="confirm-row" class="confirm-row" hidden>
-        <span class="confirm-text">Delete all watch-time data?</span>
-        <div class="confirm-actions">
-          <button id="confirm-delete-btn" type="button" class="danger">
-            Yes, delete
+      <section class="history" aria-labelledby="history-heading">
+        <p id="history-heading" class="eyebrow">Last 7 days</p>
+        <ul id="history-list" class="history-list"></ul>
+        <p class="history-total">
+          <span class="history-total-label">7-day total</span>
+          <span id="history-total" class="history-total-value">0m</span>
+        </p>
+      </section>
+
+      <footer class="footer">
+        <div class="danger-zone">
+          <button id="delete-btn" type="button" class="btn btn-quiet-danger">
+            Delete all data
           </button>
-          <button id="cancel-delete-btn" type="button">Cancel</button>
+          <div id="confirm-row" class="confirm-row" hidden>
+            <span class="confirm-text">Delete all watch-time data?</span>
+            <div class="confirm-actions">
+              <button id="confirm-delete-btn" type="button" class="btn btn-danger">
+                Yes, delete
+              </button>
+              <button id="cancel-delete-btn" type="button" class="btn">
+                Cancel
+              </button>
+            </div>
+          </div>
+          <p id="delete-status" class="delete-status" role="status" aria-live="polite"></p>
         </div>
-      </div>
-      <p id="delete-status" class="delete-status" role="status" aria-live="polite"></p>
-    </div>
-
-    <p id="version"></p>
+        <p id="version" class="version"></p>
+      </footer>
+    </main>
     <script type="module" src="popup.ts"></script>
   </body>
 </html>

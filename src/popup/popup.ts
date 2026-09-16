@@ -9,6 +9,8 @@ import {
   formatDayLabel,
   getLastNDays,
   sumSeconds,
+  maxSeconds,
+  barPercent,
   DEFAULT_WINDOW_DAYS,
 } from "../lib/history";
 
@@ -41,6 +43,9 @@ function renderHistory(store: WatchTimeStore, now: Date): void {
   }
   const todayKey = localDateKey(now);
   const days = getLastNDays(store, now, DEFAULT_WINDOW_DAYS);
+  // Bars scale against the busiest day in the window, so the shape of the week
+  // is readable even when the absolute totals are small.
+  const busiest = maxSeconds(days);
 
   listEl.replaceChildren();
   // Most-recent-first so "Today" sits directly under the Today figure.
@@ -58,11 +63,20 @@ function renderHistory(store: WatchTimeStore, now: Date): void {
     labelEl.className = "history-day";
     labelEl.textContent = formatDayLabel(day.dateKey, todayKey);
 
+    // Decorative: the adjacent value already conveys the number to AT users.
+    const barEl = document.createElement("span");
+    barEl.className = "history-bar";
+    barEl.setAttribute("aria-hidden", "true");
+    const fillEl = document.createElement("span");
+    fillEl.className = "bar-fill";
+    fillEl.style.width = `${barPercent(day.seconds, busiest)}%`;
+    barEl.append(fillEl);
+
     const valueEl = document.createElement("span");
     valueEl.className = "history-value";
     valueEl.textContent = formatDuration(day.seconds);
 
-    row.append(labelEl, valueEl);
+    row.append(labelEl, barEl, valueEl);
     listEl.append(row);
   }
 

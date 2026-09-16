@@ -4,6 +4,8 @@ import {
   getLastNDays,
   sumSeconds,
   formatDayLabel,
+  maxSeconds,
+  barPercent,
   DEFAULT_WINDOW_DAYS,
   type DayTotal,
 } from "../history";
@@ -131,5 +133,68 @@ describe("formatDayLabel", () => {
         expect(label).toBe(expected);
       }
     }
+  });
+});
+
+describe("maxSeconds", () => {
+  const day = (dateKey: string, seconds: number): DayTotal => ({
+    dateKey,
+    seconds,
+  });
+
+  it("returns 0 for an empty window", () => {
+    expect(maxSeconds([])).toBe(0);
+  });
+
+  it("returns the only day's seconds for a single-day window", () => {
+    expect(maxSeconds([day("2026-09-08", 420)])).toBe(420);
+  });
+
+  it("picks the largest value regardless of position", () => {
+    const days = [
+      day("2026-09-06", 120),
+      day("2026-09-07", 900),
+      day("2026-09-08", 300),
+    ];
+    expect(maxSeconds(days)).toBe(900);
+  });
+
+  it("returns 0 when every day is empty", () => {
+    const days = [day("2026-09-07", 0), day("2026-09-08", 0)];
+    expect(maxSeconds(days)).toBe(0);
+  });
+});
+
+describe("barPercent", () => {
+  it("gives the busiest day a full-width bar", () => {
+    expect(barPercent(900, 900)).toBe(100);
+  });
+
+  it("scales a day proportionally against the max", () => {
+    expect(barPercent(450, 900)).toBe(50);
+    expect(barPercent(225, 900)).toBe(25);
+  });
+
+  it("returns 0 for a day with no watch time", () => {
+    expect(barPercent(0, 900)).toBe(0);
+  });
+
+  it("returns 0 when the whole window is empty (no divide-by-zero)", () => {
+    expect(barPercent(0, 0)).toBe(0);
+    expect(barPercent(120, 0)).toBe(0);
+  });
+
+  it("returns 0 for negative seconds", () => {
+    expect(barPercent(-60, 900)).toBe(0);
+  });
+
+  it("clamps values above the max to 100", () => {
+    expect(barPercent(1800, 900)).toBe(100);
+  });
+
+  it("returns 0 for non-finite input", () => {
+    expect(barPercent(Number.NaN, 900)).toBe(0);
+    expect(barPercent(Number.POSITIVE_INFINITY, 900)).toBe(0);
+    expect(barPercent(300, Number.NaN)).toBe(0);
   });
 });
